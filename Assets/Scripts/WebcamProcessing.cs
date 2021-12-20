@@ -51,6 +51,8 @@ public class WebcamProcessing : MonoBehaviour
 
     Color32[] m_Data;
 
+    bool isInitialized;
+
     void OnEnable()
     {
         m_Data = new Color32[m_WebcamTextureSize.x * m_WebcamTextureSize.y];
@@ -79,50 +81,59 @@ public class WebcamProcessing : MonoBehaviour
 
     void Update()
     {
-        // load is one half of our big bottleneck with this method - copying data
-        m_CamTexture.GetPixels32(m_Data);
-        m_NativeColors.CopyFrom(m_Data);
-
-        // lineskip can only be 1, 2, or 4 - past that the effect doesn't cover the screen
-        if (lineSkip > 4)
-            lineSkip = 4;
-        else if (lineSkip == 3)
-            lineSkip = 2;
-        else if (lineSkip == 0)
-            lineSkip = 1;
-
-        switch (effect)
+        if (!isInitialized && m_CamTexture.didUpdateThisFrame)
         {
-            case ExampleEffect.ExclusiveOrSelf:
-                if (lineSkip == 1)
-                    ExclusiveOrSelfProcessWithoutLineSkip(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
-                else
-                    SelfExclusiveOrProcessing(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
-                break;
-            case ExampleEffect.ExclusiveOrThreshold:
-                if (lineSkip == 1)
-                    ExclusiveOrProcessWithoutLineSkip(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
-                else
-                    BurstExclusiveOrProcessing(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
-                break;
-            case ExampleEffect.LeftShiftThreshold:
-                if (lineSkip == 1)
-                    LeftShiftProcessWithoutLineSkip(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
-                else
-                    BurstLeftShiftProcessing(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
-                break;
-            case ExampleEffect.RightShiftThreshold:
-                if(lineSkip == 1)
-                    RightShiftProcessWithoutLineSkip(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
-                else
-                    BurstRightShiftProcessing(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
-                break;
-            case ExampleEffect.ComplementThreshold:
-                if (lineSkip == 1)
-                    ComplementWithoutLineSkip(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
-                else
-                    BurstComplementProcessing(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
-                break;
+            m_Data = new Color32[m_CamTexture.width * m_CamTexture.height];
+            m_NativeColors = new NativeArray<Color32>(m_Data, Allocator.Persistent);
+            isInitialized = true;
+        }
+        else if (isInitialized && m_CamTexture.didUpdateThisFrame)
+        {
+            // load is one half of our big bottleneck with this method - copying data
+            m_CamTexture.GetPixels32(m_Data);
+            m_NativeColors.CopyFrom(m_Data);
+
+            // lineskip can only be 1, 2, or 4 - past that the effect doesn't cover the screen
+            if (lineSkip > 4)
+                lineSkip = 4;
+            else if (lineSkip == 3)
+                lineSkip = 2;
+            else if (lineSkip == 0)
+                lineSkip = 1;
+
+            switch (effect)
+            {
+                case ExampleEffect.ExclusiveOrSelf:
+                    if (lineSkip == 1)
+                        ExclusiveOrSelfProcessWithoutLineSkip(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
+                    else
+                        SelfExclusiveOrProcessing(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
+                    break;
+                case ExampleEffect.ExclusiveOrThreshold:
+                    if (lineSkip == 1)
+                        ExclusiveOrProcessWithoutLineSkip(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
+                    else
+                        BurstExclusiveOrProcessing(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
+                    break;
+                case ExampleEffect.LeftShiftThreshold:
+                    if (lineSkip == 1)
+                        LeftShiftProcessWithoutLineSkip(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
+                    else
+                        BurstLeftShiftProcessing(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
+                    break;
+                case ExampleEffect.RightShiftThreshold:
+                    if (lineSkip == 1)
+                        RightShiftProcessWithoutLineSkip(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
+                    else
+                        BurstRightShiftProcessing(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
+                    break;
+                case ExampleEffect.ComplementThreshold:
+                    if (lineSkip == 1)
+                        ComplementWithoutLineSkip(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
+                    else
+                        BurstComplementProcessing(m_NativeRed, m_NativeGreen, m_NativeBlue, ref m_RGBComplementBurstJobHandle);
+                    break;
+            }
         }
     }
 
