@@ -246,8 +246,7 @@ public class SlicesAndStridesExample : MonoBehaviour
     private void OnDestroy()
     {
         // make sure we don't have running jobs
-        if (!m_PointCloudUpdateHandle.IsCompleted)
-            m_PointCloudUpdateHandle.Complete();
+        m_PointCloudUpdateHandle.Complete();
 
         // dispose our permanent allocations
         m_PointCloud.Dispose();
