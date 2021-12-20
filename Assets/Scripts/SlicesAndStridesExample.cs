@@ -250,7 +250,7 @@ public class SlicesAndStridesExample : MonoBehaviour
             m_PointCloudUpdateHandle.Complete();
 
         // dispose our permanent allocations
-        m_PointCloud.Dispose();
+        m_PointCloud.Dispose(m_PointCloudUpdateHandle);
         m_Distances.Dispose();
         m_DistanceResults.Dispose();
         m_ConfidenceResults.Dispose();
